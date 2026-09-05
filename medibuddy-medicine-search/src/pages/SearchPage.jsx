@@ -112,7 +112,6 @@ function SearchPage() {
             <MedicineCard
               key={index}
               medicine={medicine}
-              index={index}
             />
           ))}
         </div>

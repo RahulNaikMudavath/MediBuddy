@@ -46,3 +46,25 @@ export async function searchMedicines(query, signal) {
 
   return Array.isArray(data.results) ? data.results : [];
 }
+
+export async function getMedicineById(id, signal) {
+  const params = new URLSearchParams({
+    search: `openfda.spl_id:"${id}"`,
+  });
+
+  const response = await fetch(`${BASE_URL}?${params.toString()}`, {
+    signal,
+  });
+
+  if (response.status === 404) {
+    return null;
+  }
+
+  if (!response.ok) {
+    throw new Error("Failed to fetch medicine");
+  }
+
+  const data = await response.json();
+
+  return data.results?.[0] || null;
+}
