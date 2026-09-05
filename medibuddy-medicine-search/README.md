@@ -1,6 +1,8 @@
 # MediBuddy Medicine Search
 
 A React-based medicine search application using the FDA Drug Label API.
+The live hosted url:
+*https://medibuddy-r5g6.onrender.com*
 
 ## Features
 
