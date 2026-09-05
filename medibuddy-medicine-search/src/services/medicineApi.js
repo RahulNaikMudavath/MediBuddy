@@ -12,24 +12,37 @@ export async function searchMedicines(query, signal) {
     limit: "20",
   });
 
-  const response = await fetch(
-    `${BASE_URL}?${params.toString()}`,
-    {
+  let response;
+
+  try {
+    response = await fetch(`${BASE_URL}?${params.toString()}`, {
       signal,
+    });
+  } catch (error) {
+    if (error.name === "AbortError") {
+      throw error;
     }
-  );
+
+      throw new Error("NETWORK_ERROR", { cause: error });
+  }
 
   if (response.status === 404) {
     return [];
   }
 
+  if (response.status === 429) {
+    throw new Error("RATE_LIMIT");
+  }
+
+  if (response.status >= 500) {
+    throw new Error("SERVER_ERROR");
+  }
+
   if (!response.ok) {
-    throw new Error(
-      `FDA API request failed: ${response.status}`
-    );
+    throw new Error("UNKNOWN_ERROR");
   }
 
   const data = await response.json();
 
-  return data.results || [];
+  return Array.isArray(data.results) ? data.results : [];
 }

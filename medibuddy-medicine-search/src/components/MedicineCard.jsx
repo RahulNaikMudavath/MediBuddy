@@ -1,46 +1,55 @@
-import { useState } from "react";
-import { searchMedicines } from "../services/medicineApi";
-import MedicineCard from "../components/MedicineCard";
+import { useNavigate } from "react-router-dom";
+import { getFirstValue } from "../utils/medicineUtils";
 
-function SearchPage() {
-  const [query, setQuery] = useState("");
-  const [medicines, setMedicines] = useState([]);
+function MedicineCard({ medicine, index }) {
+  const navigate = useNavigate();
+  const openfda = medicine?.openfda;
 
-  const handleSearch = async () => {
-    try {
-      const results = await searchMedicines(query);
-
-      setMedicines(results);
-    } catch (error) {
-      console.error("ERROR:", error);
-    }
+  const handleClick = () => {
+    navigate(`/medicine/${index}`, {
+      state: {
+        medicine,
+      },
+    });
   };
 
   return (
-    <div>
-      <h1>Medicine Search</h1>
+    <article
+      className="medicine-card"
+      onClick={handleClick}
+      role="button"
+      tabIndex={0}
+      onKeyDown={(event) => {
+        if (event.key === "Enter" || event.key === " ") {
+          handleClick();
+        }
+      }}
+    >
+      <h2>{getFirstValue(openfda?.brand_name)}</h2>
 
-      <input
-        type="text"
-        value={query}
-        onChange={(event) => setQuery(event.target.value)}
-        placeholder="Search medicine brand..."
-      />
+      <div className="medicine-info">
+        <p>
+          <strong>Generic Name:</strong>{" "}
+          {getFirstValue(openfda?.generic_name)}
+        </p>
 
-      <button onClick={handleSearch}>
-        Search
-      </button>
+        <p>
+          <strong>Manufacturer:</strong>{" "}
+          {getFirstValue(openfda?.manufacturer_name)}
+        </p>
 
-      <div>
-        {medicines.map((medicine, index) => (
-          <MedicineCard
-            key={index}
-            medicine={medicine}
-          />
-        ))}
+        <p>
+          <strong>Product Type:</strong>{" "}
+          {getFirstValue(openfda?.product_type)}
+        </p>
+
+        <p>
+          <strong>Route:</strong>{" "}
+          {getFirstValue(openfda?.route)}
+        </p>
       </div>
-    </div>
+    </article>
   );
 }
 
-export default SearchPage;
+export default MedicineCard;
