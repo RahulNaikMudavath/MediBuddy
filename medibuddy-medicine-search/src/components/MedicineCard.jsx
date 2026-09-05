@@ -1,41 +1,46 @@
-function getFirstValue(value) {
-  if (!Array.isArray(value) || value.length === 0) {
-    return "Not available";
-  }
+import { useState } from "react";
+import { searchMedicines } from "../services/medicineApi";
+import MedicineCard from "../components/MedicineCard";
 
-  return value[0] || "Not available";
-}
+function SearchPage() {
+  const [query, setQuery] = useState("");
+  const [medicines, setMedicines] = useState([]);
 
-function MedicineCard({ medicine }) {
-  const openfda = medicine?.openfda;
+  const handleSearch = async () => {
+    try {
+      const results = await searchMedicines(query);
+
+      setMedicines(results);
+    } catch (error) {
+      console.error("ERROR:", error);
+    }
+  };
 
   return (
-    <article>
-      <h2>
-        {getFirstValue(openfda?.brand_name)}
-      </h2>
+    <div>
+      <h1>Medicine Search</h1>
 
-      <p>
-        <strong>Generic:</strong>{" "}
-        {getFirstValue(openfda?.generic_name)}
-      </p>
+      <input
+        type="text"
+        value={query}
+        onChange={(event) => setQuery(event.target.value)}
+        placeholder="Search medicine brand..."
+      />
 
-      <p>
-        <strong>Manufacturer:</strong>{" "}
-        {getFirstValue(openfda?.manufacturer_name)}
-      </p>
+      <button onClick={handleSearch}>
+        Search
+      </button>
 
-      <p>
-        <strong>Product Type:</strong>{" "}
-        {getFirstValue(openfda?.product_type)}
-      </p>
-
-      <p>
-        <strong>Route:</strong>{" "}
-        {getFirstValue(openfda?.route)}
-      </p>
-    </article>
+      <div>
+        {medicines.map((medicine, index) => (
+          <MedicineCard
+            key={index}
+            medicine={medicine}
+          />
+        ))}
+      </div>
+    </div>
   );
 }
 
-export default MedicineCard;
+export default SearchPage;
