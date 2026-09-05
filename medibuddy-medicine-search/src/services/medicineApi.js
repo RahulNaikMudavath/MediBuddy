@@ -1,14 +1,22 @@
 const BASE_URL = "https://api.fda.gov/drug/label.json";
 
-export async function searchMedicines(query, signal) {
-  const trimmedQuery = query.trim();
+const cache = new Map();
 
-  if (!trimmedQuery) {
+export async function searchMedicines(query, signal) {
+  const text = query.trim();
+
+  if (!text) {
     return [];
   }
 
+  const key = text.toLowerCase();
+
+  if (cache.has(key)) {
+    return cache.get(key);
+  }
+
   const params = new URLSearchParams({
-    search: `openfda.brand_name:"${trimmedQuery}"`,
+    search: `openfda.brand_name:"${text}"`,
     limit: "20",
   });
 
@@ -23,10 +31,11 @@ export async function searchMedicines(query, signal) {
       throw error;
     }
 
-      throw new Error("NETWORK_ERROR", { cause: error });
+    throw new Error("NETWORK_ERROR");
   }
 
   if (response.status === 404) {
+    cache.set(key, []);
     return [];
   }
 
@@ -43,8 +52,13 @@ export async function searchMedicines(query, signal) {
   }
 
   const data = await response.json();
+  const results = Array.isArray(data.results)
+    ? data.results
+    : [];
 
-  return Array.isArray(data.results) ? data.results : [];
+  cache.set(key, results);
+
+  return results;
 }
 
 export async function getMedicineById(id, signal) {
@@ -52,16 +66,17 @@ export async function getMedicineById(id, signal) {
     search: `openfda.spl_id:"${id}"`,
   });
 
-  const response = await fetch(`${BASE_URL}?${params.toString()}`, {
-    signal,
-  });
+  const response = await fetch(
+    `${BASE_URL}?${params.toString()}`,
+    { signal }
+  );
 
   if (response.status === 404) {
     return null;
   }
 
   if (!response.ok) {
-    throw new Error("Failed to fetch medicine");
+    throw new Error("FAILED_TO_LOAD");
   }
 
   const data = await response.json();

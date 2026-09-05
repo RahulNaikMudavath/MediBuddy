@@ -1,16 +1,13 @@
 import { useNavigate } from "react-router-dom";
 import { getFirstValue } from "../utils/medicineUtils";
 
-function MedicineCard({ medicine, index }) {
+function MedicineCard({ medicine }) {
   const navigate = useNavigate();
   const openfda = medicine?.openfda;
+  const id = openfda?.spl_id?.[0];
 
   const handleClick = () => {
-    navigate(`/medicine/${index}`, {
-      state: {
-        medicine,
-      },
-    });
+    navigate(`/medicine/${encodeURIComponent(id)}`);
   };
 
   return (
