@@ -86,11 +86,15 @@ function SearchPage() {
           placeholder="Search medicine brand..."
         />
 
-        {loading && <span>Searching...</span>}
+        {loading && (
+          <div className="state-message">
+            <p>Searching for medicines...</p>
+          </div>
+        )}
       </div>
 
       {!loading && error && (
-        <div>
+        <div className="error-message">
           <p>{error}</p>
         </div>
       )}
@@ -99,7 +103,7 @@ function SearchPage() {
         !error &&
         searchedQuery &&
         medicines.length === 0 && (
-          <div>
+          <div className="state-message">
             <h2>No results found</h2>
             <p>
               No medicines found for "{searchedQuery}".
@@ -111,7 +115,11 @@ function SearchPage() {
         <div className="medicine-list">
           {medicines.map((medicine, index) => (
             <MedicineCard
-              key={index}
+              key={
+                medicine?.openfda?.spl_id?.[0] ||
+                medicine?.openfda?.product_ndc?.[0] ||
+                index
+              }
               medicine={medicine}
             />
           ))}
