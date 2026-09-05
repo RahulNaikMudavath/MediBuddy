@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { searchMedicines } from "../services/medicineApi";
+import MedicineCard from "../components/MedicineCard";
 
 function SearchPage() {
   const [query, setQuery] = useState("");
@@ -8,7 +9,6 @@ function SearchPage() {
   const handleSearch = async () => {
     try {
       const results = await searchMedicines(query);
-
       setMedicines(results);
     } catch (error) {
       console.error("ERROR:", error);
@@ -16,27 +16,28 @@ function SearchPage() {
   };
 
   return (
-    <div>
+    <div className="search-page">
       <h1>Medicine Search</h1>
 
-      <input
-        type="text"
-        value={query}
-        onChange={(event) => setQuery(event.target.value)}
-        placeholder="Search medicine brand..."
-      />
+      <div className="search-container">
+        <input
+          type="text"
+          value={query}
+          onChange={(event) => setQuery(event.target.value)}
+          placeholder="Search medicine brand..."
+        />
 
-      <button onClick={handleSearch}>
-        Search
-      </button>
+        <button onClick={handleSearch}>
+          Search
+        </button>
+      </div>
 
-      <div>
+      <div className="medicine-list">
         {medicines.map((medicine, index) => (
-          <div key={index}>
-            <pre>
-              {JSON.stringify(medicine.openfda, null, 2)}
-            </pre>
-          </div>
+          <MedicineCard
+            key={index}
+            medicine={medicine}
+          />
         ))}
       </div>
     </div>
