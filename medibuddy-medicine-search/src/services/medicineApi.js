@@ -1,31 +1,35 @@
-const API_BASE_URL = import.meta.env.VITE_MEDICINE_API_URL ?? ''
+const BASE_URL = "https://api.fda.gov/drug/label.json";
 
-export async function searchMedicines(query) {
-  if (!API_BASE_URL || !query.trim()) {
-    return []
+export async function searchMedicines(query, signal) {
+  const trimmedQuery = query.trim();
+
+  if (!trimmedQuery) {
+    return [];
   }
+
+  const params = new URLSearchParams({
+    search: `openfda.brand_name:"${trimmedQuery}"`,
+    limit: "20",
+  });
 
   const response = await fetch(
-    `${API_BASE_URL}/medicines?search=${encodeURIComponent(query.trim())}`,
-  )
+    `${BASE_URL}?${params.toString()}`,
+    {
+      signal,
+    }
+  );
+
+  if (response.status === 404) {
+    return [];
+  }
 
   if (!response.ok) {
-    throw new Error('Medicine search failed')
+    throw new Error(
+      `FDA API request failed: ${response.status}`
+    );
   }
 
-  return response.json()
-}
+  const data = await response.json();
 
-export async function getMedicineById(id) {
-  if (!API_BASE_URL) {
-    return null
-  }
-
-  const response = await fetch(`${API_BASE_URL}/medicines/${encodeURIComponent(id)}`)
-
-  if (!response.ok) {
-    throw new Error('Medicine details could not be loaded')
-  }
-
-  return response.json()
+  return data.results || [];
 }
